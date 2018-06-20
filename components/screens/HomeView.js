@@ -12,6 +12,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Button from 'apsl-react-native-button'
 import Config from '../config';
 
+import IDService from '../lib/IDService';
+import PatrolService from '../lib/PatrolService';
 
 
 class HomeView extends React.Component {
@@ -24,8 +26,11 @@ class HomeView extends React.Component {
 
         super(props);
 
-        this.state = {
+        this.idService = IDService.getInstance();
+        this.patrolService = PatrolService.getInstance();
 
+        this.state = {
+            description: ''
         };
 
 
@@ -62,18 +67,54 @@ class HomeView extends React.Component {
         );
     }
 
-    onPressPhotoButton(){
+    onPressPhotoButton() {
         this.props.navigator.showModal({
             screen: "convoyer.CameraView", // unique ID registered with Navigation.registerScreen
             title: "CONVOYER", // title of the screen as appears in the nav bar (optional)
             passProps: {
-              onDone: (data) => {
-      
-              }
-      
+                onDone: (data) => {
+
+                    let mediaType = this.patrolService.getMediaType();
+
+                    this.idService.createIncidentID();
+                    this.uploadMedia();
+
+                }
+
             }, // simple serializable object that will pass as props to the modal (optional)
             animationType: 'slide-up' // 'none' / 'slide-up' , appear animation for the modal (optional, default 'slide-up')
-          });
+        });
+    }
+
+
+    uploadMedia() {
+
+        var filePath = this.patrolService.getMediaPath();
+        const image = {
+            uri: filePath,
+            type: 'image/jpeg',
+            name: 'photo.jpg',
+          };
+          
+          const form = new FormData();
+          form.append("image", image);
+          
+          fetch(
+            "http://ec2-34-215-115-69.us-west-2.compute.amazonaws.com:3000/imageRecognition/searchForImageMatch",
+            {
+              body: form,
+              method: "PUT",
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            }
+          ).then((response) => response.json())
+          .catch((error) => {
+            alert("ERROR " + error)
+          })
+          .then((responseData) => {
+            alert("Succes "+ JSON.stringify(responseData))
+          }).done();
     }
 
 

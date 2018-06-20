@@ -2,16 +2,18 @@
 import React, { Component } from 'react';
 import {
     AppRegistry,
+    Dimensions,
     StyleSheet,
     Text,
+    TouchableHighlight,
     View
 } from 'react-native';
-
 
 import { RNCamera } from 'react-native-camera';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Button from 'apsl-react-native-button'
 import Config from '../config';
+import PatrolService from '../lib/PatrolService';
 
 
 
@@ -24,9 +26,10 @@ class CameraView extends React.Component {
     constructor(props) {
 
         super(props);
+        this.patrolService = PatrolService.getInstance();
+
 
         this.state = {
-
         };
 
 
@@ -40,6 +43,11 @@ class CameraView extends React.Component {
 
 
     ComponentDidMount() {
+        this.patrolService.getState((state) => {
+            this.setState({
+                patrolData: state
+            });
+        });
     }
 
     render() {
@@ -103,16 +111,22 @@ class CameraView extends React.Component {
         //options.location = ...
         this.camera.takePictureAsync(options)
             .then((data) => {
+                this.patrolService.setMediaType('photo');
                 console.log("logging uri");
                 console.log(data.uri);
                 console.log(data)
+                this.patrolService.setMediaPath(data.uri);
 
                 this.props.onDone(data.uri);
 
                 this.props.navigator.dismissModal({
                     animationType: 'slide-down' // 'none' / 'slide-down' , dismiss animation for the modal (optional, default 'slide-down')
                 });
+
             })
+
+
+
             .catch(err => console.error(err));
     }
 }
