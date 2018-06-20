@@ -38,8 +38,6 @@ class HomeView extends React.Component {
             to: 'hidden', // required, 'hidden' = hide navigation bar, 'shown' = show navigation bar
             animated: true // does the toggle have transition animation or does it happen immediately (optional). By default animated: true
         });
-
-
     }
 
 
@@ -103,7 +101,7 @@ class HomeView extends React.Component {
             "http://ec2-34-215-115-69.us-west-2.compute.amazonaws.com:3000/imageRecognition/searchForImageMatch",
             {
               body: form,
-              method: "PUT",
+              method: "POST",
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
